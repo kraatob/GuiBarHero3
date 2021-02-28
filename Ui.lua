@@ -1,9 +1,9 @@
 local LAYOUT = { 
 	main = { border = 4, alpha = 0.8 },
-	bar = { height = 16, width = 410, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
+	bar = { height = 16, width = 260, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
 	icon = { height = 20, width = 20, dist = 1, vdist = 4, skip = 8, alpha = 0.7, text_color={1,1,1} },
-	large_icon = { height = 30, width = 30, dist = 4, skip = 8, max = 11, alpha = 1, dim_alpha = 0.2 },
-	profile = { height = 20, width = 30, dist = 2, skip = 8, max = 10, font = "Fonts\\FRIZQT__.TTF", font_size = 14, current_color = {1, 1, 1, 1}, color = {.7, .7, .7, .5} },
+	large_icon = { height = 30, width = 30, dist = 4, skip = 8, max = 6, alpha = 1, dim_alpha = 0.2 },
+	profile = { height = 20, width = 30, dist = 2, skip = 8, max = 5, font = "Fonts\\FRIZQT__.TTF", font_size = 14, current_color = {1, 1, 1, 1}, color = {.7, .7, .7, .5} },
 	chord = { height = 8, width = 64, alpha = .7, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Glow" },
 	right_note = { height = 16, width = 16, offset = 0, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Rightarrow" },
 	left_note = { height = 16, width = 16, offset = -16, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Leftarrow" },
@@ -45,7 +45,7 @@ function MainFrame:Initialize()
 end
 
 function MainFrame:CreateFrame()
-	local frame = CreateFrame("Frame", "MainFrame", UIParent)
+	local frame = CreateFrame("Frame", "MainFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
 	frame.owner = self
 	frame:SetWidth(LAYOUT.bar.width + 2 * LAYOUT.main.border)
 	frame:SetHeight(2 * LAYOUT.main.border + 2 * LAYOUT.bar.skip + LAYOUT.bar.height)
@@ -125,7 +125,7 @@ function MainFrame:CreateBridgeFrame()
 	bridge_frame:SetPoint("TOPLEFT", LAYOUT.bridge.x + LAYOUT.bridge.offset + LAYOUT.main.border, -LAYOUT.main.border + 1)
 	bridge_frame:SetPoint("BOTTOMLEFT", LAYOUT.bridge.x + LAYOUT.bridge.offset + LAYOUT.main.border, LAYOUT.main.border - 1)
 	local tex = bridge_frame:CreateTexture("bridge", OVERLAY)
-	tex:SetTexture(unpack(LAYOUT.bridge.color))
+	tex:SetColorTexture(unpack(LAYOUT.bridge.color))
 	tex:SetAllPoints()
 end
 
@@ -134,7 +134,7 @@ function MainFrame:CreateGcdFrame()
 	gcd_frame:SetFrameLevel(5)
 	gcd_frame:SetWidth(3)
 	local tex = gcd_frame:CreateTexture("gcd", OVERLAY)
-	tex:SetTexture(unpack(LAYOUT.bridge.color))
+	tex:SetColorTexture(unpack(LAYOUT.bridge.color))
 	tex:SetAllPoints()
 	gcd_frame.tex = tex
 	main_frame.gcd_frame = gcd_frame
@@ -196,7 +196,14 @@ function MainFrame:SpellDropped(nr, icons)
 	local info_type, id, link = GetCursorInfo()
 	local name
 	if info_type == "spell" then
-		name = GetSpellBookItemName(id, BOOKTYPE_SPELL)
+		if id == 0 then
+			name = "Execute" -- why??
+		else
+			name = GetSpellBookItemName(id, BOOKTYPE_SPELL)
+		end
+		if name == "Enraged Regeneration" then
+			name = "Enrage"
+		end
 	elseif info_type == "item" then
 		if link == GetInventoryItemLink("player", GetInventorySlotInfo("Trinket0Slot")) then
 			name = "Trinket 1"
@@ -303,6 +310,12 @@ function MainFrame:SetBars(spells, icons)
 		end
 		if spells[i] then
 			local slot, name = GuiBarHero.Utils:FindSpell(spells[i].name)
+			if not name and spells[i].name then
+				local info = GuiBarHero.Config.spells[spells[i].name]
+				if info and info.alias then
+					slot, name = GuiBarHero.Utils:FindSpell(info.alias)
+				end
+			end
 			if name then 
 				local new_bar = Bar:Aquire(frame, icons, self.event_registry)
 				if icons then
@@ -316,7 +329,7 @@ function MainFrame:SetBars(spells, icons)
 						LAYOUT.bar.skip + (LAYOUT.icon.height - LAYOUT.bar.height)/2, 
 						LAYOUT.icon.width, LAYOUT.icon.height)
 				end
-				new_bar:SetSpell(spells[i])
+				new_bar:SetSpell(name, spells[i].alt)
 				new_bar:Show()
 				current_bars[i] = new_bar
 			end
@@ -403,7 +416,6 @@ end
 function Bar:Initialize(parent, icon_only, event_registry)
 	self.event_registry = event_registry
 	self.icon_only = icon_only
-	self.note_type = LAYOUT.center_note
 	self.next_note = 0
 	self.spell_info = GuiBarHero.Config.template.none
 	self.GUID = UnitGUID("player")
@@ -478,17 +490,19 @@ function Bar:RefreshBar()
 	self.dimmed_chord_tex:SetHeight(self.height)
 	self.dimmed_chord_tex:SetVertexColor(r, g, b, LAYOUT.chord.alpha * LAYOUT.bar.dim_alpha)
 
-	local scale = self.height / self.note_type.height
-	self.note_offset = self.note_type.offset * scale
-	self.note_width = self.note_type.width * scale
+	if self.note_type then
+		local scale = self.height / self.note_type.height
+		self.note_offset = self.note_type.offset * scale
+		self.note_width = self.note_type.width * scale
 
-	tex = self.note_tex
-	tex:SetTexture(self.note_type.path, true)
-	tex:SetBlendMode("ADD")
-	tex:SetVertexColor(unpack(self.spell_info.color))
-	tex:SetDrawLayer("OVERLAY")
-	tex:SetHeight(self.height)
-	tex:SetWidth(self.note_width)
+		tex = self.note_tex
+		tex:SetTexture(self.note_type.path, true)
+		tex:SetBlendMode("ADD")
+		tex:SetVertexColor(unpack(self.spell_info.color))
+		tex:SetDrawLayer("OVERLAY")
+		tex:SetHeight(self.height)
+		tex:SetWidth(self.note_width)
+	end
 end
 
 function Bar:RefreshIcon(_, unit)
@@ -528,15 +542,15 @@ function Bar:SetIconPosition(x, y, width, height)
 	self.icon_text:Hide()
 end
 
-function Bar:SetSpell(spell)
-	self.spell = GuiBarHero.Spell:Create(spell.name, spell.alt, self.event_registry)
+function Bar:SetSpell(name, alt)
+	self.spell = GuiBarHero.Spell:Create(name, alt, self.event_registry)
 	self.spell_info = self.spell:GetInfo()
 	local note_type = self.spell_info.note
 	if note_type == "LEFT" then
 		self.note_type = LAYOUT.left_note
 	elseif note_type == "RIGHT" then
 		self.note_type = LAYOUT.right_note
-	else
+	elseif note_type == "CENTER" then
 		self.note_type = LAYOUT.center_note
 	end
 
@@ -638,6 +652,7 @@ function Bar:DrawChord(start, stop, dimmed)
 end
 
 function Bar:DrawNote(note, dimmed)
+	if not self.note_type then return end
 	local r,g,b = unpack(self.spell_info.color)
 	local alpha = 1
 	if dimmed then alpha = LAYOUT.bar.dim_alpha end

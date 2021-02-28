@@ -81,17 +81,33 @@ function Spell:UpdateDebuff(event, unit)
 end
 
 function Spell:GetBuff(name)
-    return UnitBuff("player", name)
+    return self:FindByName(UnitBuff, "player", name)
 end
 
 function Spell:GetDebuff(name)
-    return UnitDebuff("target", name)
+    return self:FindByName(UnitDebuff, "target", name)
+end
+
+function Spell:FindByName(getter, unit, nameToFind)
+	local buff
+	local i = 1
+	while true do
+		local name, icon, count, debuffType, duration, expirationTime, source = getter(unit, i)
+		if name == nil then
+			break
+		end
+		if name == nameToFind then
+			return name, icon, count, debuffType, duration, expirationTime, source
+		end
+		i = i + 1
+	end
 end
 
 function Spell:UpdateBuff(get_buff)
 	local latest_expire, count = self:BuffEnd(get_buff)
 	local found = latest_expire
 	local last_bar_start = self.bar_start or 0
+	local last_bar_end = self.bar_end
 	if not found then
 		self.bar_start = nil
 		self.bar_end = nil
@@ -123,6 +139,16 @@ function Spell:UpdateBuff(get_buff)
 		self.bar_start = 0
 	end
 
+	if self.spell_info.invert then
+		if self.bar_start then
+			self.bar_end = self.bar_start
+			self.bar_start = nil
+		else
+			self.bar_start = 0
+			self.bar_end = last_bar_end
+		end
+	end
+
 	self:ShowBuffOrDebuff(last_bar_start)
 
 	if self.spell_info.show_stack_count and count and not found then
@@ -137,7 +163,7 @@ function Spell:BuffEnd(get_buff, only_self)
 	local total_count = 0
 	local latest_expire = 0
 	local found = false
-	name, _, _, count, _, _, expires, caster = get_buff(self, self.spell_name)
+	name, _, count, _, _, expires, caster = get_buff(self, self.spell_name)
 	if (name and (not only_self or caster == "player")) then
 		total_count = total_count + count
 		if ((not self.spell_info.stacks) or (not count) or count >= self.spell_info.stacks) then
@@ -204,7 +230,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.need_aura then
-		name, _, _, _, _, _, expires = UnitBuff("player", self.spell_info.need_aura)
+		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_aura)
 		if name then
 			self.bar_end = expires
 		else
@@ -214,7 +240,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name, _, _, _, _, _, expires = UnitBuff("player", self.spell_info.also_lit_on_aura)
+		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
 		if name then
 			self.bar_start = 0
 			self.bar_end = expires
@@ -222,7 +248,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.need_no_aura then
-		name, _, _, _, _, _, expires = UnitBuff("player", self.spell_info.need_no_aura)
+		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_no_aura)
 		if name and self.bar_start < expires then
 			self.bar_start = expires
 		end
@@ -230,7 +256,7 @@ function Spell:UpdateCooldown(event, unit)
 
 	self.icon_text = nil
 	if self.spell_info.show_buff_count then
-		local found, _, _, count = UnitBuff("player", self.spell_info.show_buff_count)
+		local found, _, _, count = self:FindByName(UnitBuff, "player", self.spell_info.show_buff_count)
 		if found then
 			self.icon_text = "" .. count
 		end
@@ -398,7 +424,7 @@ function Spell:EnrageEnd()
 	local found
 	local latest_expires = 0
 	for _, aura in ipairs(GuiBarHero.Config.enrage_auras) do
-		name, _, _, _, _, _, expires = UnitBuff("player", aura)
+		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", aura)
 		if name and expires > latest_expires then
 			found = true
 			latest_expires = expires

@@ -83,14 +83,27 @@ Config.template = {
 }
 
 Config.gcd_spells = {"Wild Strike", "Devastate", "Shadow Bolt"}
-Config.enrage_auras = {"Berserker Rage", "Death Wish", "Enrage"}
+Config.enrage_auras = {"Enrage"}
 
 Config.spells = {
 	["Bloodthirst"] = {
+		alias = "Bloodbath",
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.red,
 		need_target = true,
+	},
+	["Bloodbath"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},
+	["Enrage"] = {
+		type = "SELFBUFF",
+		note = "NONE",
+		color = Colors.orange,
+		invert = true,
 	},
 	["Whirlwind"] = {
 		type = "COOLDOWN",
@@ -163,7 +176,6 @@ Config.spells = {
 	},
 	["Rampage"] = {
 		type = "SELFBUFF",
-		note = "LEFT",
 		color = Colors.orange,
 	},
 	["Rend"] = {
@@ -227,14 +239,20 @@ Config.spells = {
 	},
 	["Cleave"] = Config.template.melee(55),
 	["Raging Blow"] = {
+		alias = "Crushing Blow",
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.red,
 		need_target = true,
-		show_buff_count = "Raging Blow!",
-		need_aura = "Raging Blow!",
+		dim_on_charges = 1,
 	},
-	["Dragon Roar"] = Config.template.instant_aoe,
+	["Crushing Blow"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+		dim_on_charges = 1,
+	},
 	["Colossus Smash"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
@@ -271,6 +289,7 @@ Config.spells = {
 		color = Colors.violet,
 		show_buff = true,
 	},
+	["Disarm"] = Config.template.attack,
 	["Bloodbath"] = {
 		{
 			type = "COOLDOWN",
@@ -286,7 +305,6 @@ Config.spells = {
 			show_buff = true,
 		},
 	},
-	["Disarm"] = Config.template.attack,
 	["Demoralizing Banner"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",

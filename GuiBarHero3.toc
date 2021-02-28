@@ -1,4 +1,4 @@
-## Interface: 60000
+## Interface: 90002
 ## Title: GuiBarHero3
 ## Notes: Visualize cooldowns and buff durations Guitar-Hero-style.
 ## Author: TK
@@ -8,14 +8,14 @@
 ## X-Category: Interface Enhancements
 
 #@no-lib-strip@
-libs\LibStub\LibStub.lua
-libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-libs\AceAddon-3.0\AceAddon-3.0.xml
-libs\AceGUI-3.0\AceGUI-3.0.xml
-libs\AceDB-3.0\AceDB-3.0.xml
-libs\AceConsole-3.0\AceConsole-3.0.xml
-libs\AceEvent-3.0\AceEvent-3.0.xml
-libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
 #@end-no-lib-strip@
 
 Core.lua
