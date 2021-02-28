@@ -1,8 +1,8 @@
 local LAYOUT = { 
 	main = { border = 4, alpha = 0.8 },
-	bar = { height = 16, width = 260, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
+	bar = { height = 16, width = 316, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
 	icon = { height = 20, width = 20, dist = 1, vdist = 4, skip = 8, alpha = 0.7, text_color={1,1,1} },
-	large_icon = { height = 30, width = 30, dist = 4, skip = 8, max = 6, alpha = 1, dim_alpha = 0.2 },
+	large_icon = { height = 28, width = 28, dist = 4, skip = 8, max = 9, alpha = 1, dim_alpha = 0.2 },
 	profile = { height = 20, width = 30, dist = 2, skip = 8, max = 5, font = "Fonts\\FRIZQT__.TTF", font_size = 14, current_color = {1, 1, 1, 1}, color = {.7, .7, .7, .5} },
 	chord = { height = 8, width = 64, alpha = .7, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Glow" },
 	right_note = { height = 16, width = 16, offset = 0, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Rightarrow" },
@@ -197,7 +197,15 @@ function MainFrame:SpellDropped(nr, icons)
 	local name
 	if info_type == "spell" then
 		if id == 0 then
-			name = "Execute" -- why??
+			-- for some reason, sometimes the cursor will not tell us the spell
+			-- in this case we fall back to a rotating list of "known unknown" spells
+			local current
+			if icons then
+				current = GuiBarHero.settings:GetIconSpellName(nr)
+			else
+				current = GuiBarHero.settings:GetBarSpellName(nr)
+			end
+			name = GuiBarHero.settings:GetNextUnknown(nr, current)
 		else
 			name = GetSpellBookItemName(id, BOOKTYPE_SPELL)
 		end

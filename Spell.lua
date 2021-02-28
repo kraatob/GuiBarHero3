@@ -240,7 +240,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
+		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
 		if name then
 			self.bar_start = 0
 			self.bar_end = expires
@@ -248,7 +248,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.need_no_aura then
-		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_no_aura)
+		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_no_aura)
 		if name and self.bar_start < expires then
 			self.bar_start = expires
 		end
@@ -256,7 +256,7 @@ function Spell:UpdateCooldown(event, unit)
 
 	self.icon_text = nil
 	if self.spell_info.show_buff_count then
-		local found, _, _, count = self:FindByName(UnitBuff, "player", self.spell_info.show_buff_count)
+		local found, _, count = self:FindByName(UnitBuff, "player", self.spell_info.show_buff_count)
 		if found then
 			self.icon_text = "" .. count
 		end
@@ -303,7 +303,7 @@ function Spell:ValidTarget()
 	return true
 end
 
-Spell.update_slot_item_events = { "BAG_UPDATE_COOLDOWN", "UNIT_INVENTORY_CHANGED", "UNIT_AURA" }
+Spell.update_slot_item_events = { "SPELL_UPDATE_COOLDOWN", "UNIT_INVENTORY_CHANGED", "UNIT_AURA" }
 
 function Spell:UpdateSlotItem(event, unit)
 	if (event == "UNIT_INVENTORY_CHANGED" or event == "UNIT_AURA") and unit ~= "player" then return end
@@ -315,11 +315,11 @@ function Spell:UpdateSlotItem(event, unit)
 			local expires, buff_texture
 			local item_id = GetInventoryItemID("player", self.spell_info.slot_id)
 			local name, _, _, _, _, _, _, _, _, item_texture = GetItemInfo(item_id)
-			_, _, _, _, _, _, expires = UnitBuff("player", name)
+			_, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", name)
 			if not expires then
 				-- attempt to guess by texture
 				for i = 1, 40 do
-					_, _, buff_texture, _, _, _, expires = UnitBuff("player", i)
+					_, _, buff_texture, _, _, _, expires = self:FindByName(UnitBuff, "player", i)
 					if (not buff_texture) or buff_texture == item_texture then
 						break
 					end
@@ -398,9 +398,16 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name, _, _, _, _, _, expires = UnitBuff("player", self.spell_info.also_lit_on_aura)
+		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
 		if name then
 			dim_start = nil
+		end
+	end
+
+	if self.spell_info.dim_on_missing_buff then
+		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
+		if not name then
+			dim_start = bar_start
 		end
 	end
 

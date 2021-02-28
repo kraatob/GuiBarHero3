@@ -30,9 +30,15 @@ end
 function Settings:SetPosition(position)
 	self.database.position = position
 end
-
 function Settings:CurrentProfile()
-	return self.database.profiles[self.database.current_profile] or { bars = {}, icons = {} }
+	local profile = self.database.profiles[self.database.current_profile]
+	if profile then
+		return profile
+	else
+		profile = { bars = {}, icons = {} }
+		self.database.profiles[self.database.current_profile] = profile
+		return profile
+	end
 end
 
 function Settings:GetCurrentProfile()
@@ -105,6 +111,21 @@ end
 function Settings:GetIconSpellName(nr)
 	local icons = self:GetIcons()
 	return icons[nr] and icons[nr].name
+end
+
+function Settings:GetNextUnknown(nr, current)
+	local unknownSpells = GuiBarHero.Config.unknown_spells
+	local currentIndex = 0
+	if current then
+		for _, name in ipairs(unknownSpells) do
+			currentIndex = currentIndex + 1
+			if name == current then
+				break
+			end
+		end
+	end
+	local nextIndex = (currentIndex % #unknownSpells) + 1
+	return unknownSpells[nextIndex]
 end
 
 GuiBarHero.Settings = Settings

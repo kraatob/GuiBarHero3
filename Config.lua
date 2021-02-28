@@ -85,6 +85,8 @@ Config.template = {
 Config.gcd_spells = {"Wild Strike", "Devastate", "Shadow Bolt"}
 Config.enrage_auras = {"Enrage"}
 
+Config.unknown_spells = {"Execute", "Whirlwind", "Revenge"}
+
 Config.spells = {
 	["Bloodthirst"] = {
 		alias = "Bloodbath",
@@ -109,8 +111,9 @@ Config.spells = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.red,
-		need_target = true,
-		show_buff_count = "Meat Cleaver",
+		need_target = false,
+		show_buff_count = "Whirlwind",
+		dim_on_missing_buff = "Whirlwind",
 	},
 	["Execute"] = Config.template.reactive,
 	["Overpower"] = Config.template.reactive,
@@ -145,7 +148,13 @@ Config.spells = {
 		}
 	},
 	["Devastate"] = Config.template.attack,
-	["Revenge"] = Config.template.attack,
+	["Revenge"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+		dim_on_missing_buff = "Revenge!",
+	},
 	["Shield Slam"] = Config.template.attack,
 	["Bladestorm"] = Config.template.instant_aoe,
 	["Shockwave"] = Config.template.instant_aoe,
@@ -172,7 +181,6 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.violet,
 		show_buff = true,
-		dim_unless_enrage = true,
 	},
 	["Rampage"] = {
 		type = "SELFBUFF",
@@ -290,21 +298,6 @@ Config.spells = {
 		show_buff = true,
 	},
 	["Disarm"] = Config.template.attack,
-	["Bloodbath"] = {
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = Colors.violet,
-			show_buff = true,
-			dim_unless_enrage = true,
-		},
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = Colors.violet,
-			show_buff = true,
-		},
-	},
 	["Demoralizing Banner"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
