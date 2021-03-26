@@ -195,7 +195,7 @@ function Spell:BuffEnd(get_buff, only_self)
 end
 
 
-Spell.update_cooldown_events = { "SPELL_UPDATE_COOLDOWN", "PLAYER_TARGET_CHANGED", "CURRENT_SPELL_CAST_CHANGED", "ACTIONBAR_UPDATE_STATE", "UNIT_AURA" }
+Spell.update_cooldown_events = { "SPELL_UPDATE_COOLDOWN", "PLAYER_TARGET_CHANGED", "CURRENT_SPELL_CAST_CHANGED", "ACTIONBAR_UPDATE_STATE", "UNIT_AURA", "UNIT_POWER_UPDATE" }
 
 function Spell:UpdateCooldown(event, unit)
 	if event == "UNIT_AURA" and unit ~= "target" and unit ~= "player" then return end
@@ -271,7 +271,7 @@ function Spell:UpdateCooldown(event, unit)
 		end
 	end
 
-	self:ShowBuffOrDebuff(last_bar_start)
+	self:ShowBuffOrDebuff(self.bar_start)
 end
 
 function Spell:ShowBuffOrDebuff(last_bar_start)
@@ -354,6 +354,10 @@ function Spell:GetStatus()
 		bar_start = 0
 		dim_start = 0
 		dim_end = nil
+	end
+
+	if self.spell_info.hide_on_dim and dim_start then
+		hidden = true
 	end
 
 	return dim_start, dim_end, hidden, bar_start, bar_end, self.icon_text

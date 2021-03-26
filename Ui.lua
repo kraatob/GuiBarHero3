@@ -1,6 +1,6 @@
 local LAYOUT = { 
 	main = { border = 4, alpha = 0.8 },
-	bar = { height = 16, width = 316, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
+	bar = { height = 12, width = 316, skip = 7, max = 20, dim_alpha = 0.4, speed = 30 }, 
 	icon = { height = 20, width = 20, dist = 1, vdist = 4, skip = 8, alpha = 0.7, text_color={1,1,1} },
 	large_icon = { height = 28, width = 28, dist = 4, skip = 8, max = 9, alpha = 1, dim_alpha = 0.2 },
 	profile = { height = 20, width = 30, dist = 2, skip = 8, max = 5, font = "Fonts\\FRIZQT__.TTF", font_size = 14, current_color = {1, 1, 1, 1}, color = {.7, .7, .7, .5} },

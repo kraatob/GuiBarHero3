@@ -82,10 +82,10 @@ Config.template = {
 	end,
 }
 
-Config.gcd_spells = {"Wild Strike", "Devastate", "Shadow Bolt"}
+Config.gcd_spells = {"Wild Strike", "Devastate", "Devastator", "Shadow Bolt"}
 Config.enrage_auras = {"Enrage"}
 
-Config.unknown_spells = {"Execute", "Whirlwind", "Revenge"}
+Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn"}
 
 Config.spells = {
 	["Bloodthirst"] = {
@@ -104,7 +104,7 @@ Config.spells = {
 	["Enrage"] = {
 		type = "SELFBUFF",
 		note = "NONE",
-		color = Colors.orange,
+		color = Colors.yellow,
 		invert = true,
 	},
 	["Whirlwind"] = {
@@ -115,7 +115,14 @@ Config.spells = {
 		show_buff_count = "Whirlwind",
 		dim_on_missing_buff = "Whirlwind",
 	},
-	["Execute"] = Config.template.reactive,
+	["Execute"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+		need_target = true,
+		hide_on_dim = true,
+	},
+	["Condemn"] = Config.template.attack,
 	["Overpower"] = Config.template.reactive,
 	["Mortal Strike"] = {
 		Config.template.attack,
@@ -138,15 +145,6 @@ Config.spells = {
 			max_rage = 70,
 		}
 	},
-	["Commanding Shout"] = {
-		Config.template.self_buff({"Power Word: Fortitude", "Blood Pact"}),
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = Colors.orange,
-			max_rage = 70,
-		}
-	},
 	["Devastate"] = Config.template.attack,
 	["Revenge"] = {
 		type = "COOLDOWN",
@@ -156,9 +154,13 @@ Config.spells = {
 		dim_on_missing_buff = "Revenge!",
 	},
 	["Shield Slam"] = Config.template.attack,
-	["Bladestorm"] = Config.template.instant_aoe,
+	["Bladestorm"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+		dim_unless_enrage = true,
+	},
 	["Shockwave"] = Config.template.instant_aoe,
-	["Concussion Blow"] = Config.template.attack,
 	["Sweeping Strikes"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
@@ -186,13 +188,6 @@ Config.spells = {
 		type = "SELFBUFF",
 		color = Colors.orange,
 	},
-	["Rend"] = {
-		type = "DEBUFF",
-		note = "RIGHT",
-		color = Colors.red,
-		stacks = 0,
-		shared_buffs = {}
-	},
 	["Shield Block"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
@@ -202,50 +197,15 @@ Config.spells = {
 		dim_on_charges = 1,
 		dim = true,
 	},
-	["Shield Barrier"] = {
-		type = "SELFBUFF",
-		note = "RIGHT",
-		color = Colors.orange,
-	},
 	["Shield Wall"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.blue,
 		show_buff = true,
 	},
-	["Wild Strike"] = {
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = Colors.red,
-			min_rage = 55,
-			need_target = true,
-			show_buff_count = "Bloodsurge",
-			also_lit_on_aura = "Bloodsurge"
-		},
-	},
 	["Demoralizing Shout"] = Config.template.debuff(nil, {"Demoralizing Roar"}, true),
 	["Hamstring"] = Config.template.debuff(),
 	["Thunder Clap"] = { Config.template.debuff(nil, {"Weakened Blows", "Frost Fever"}), Config.template.instant_aoe },
-	["Sunder Armor"] = Config.template.debuff(3, {"Weakened Armor"}),
-	["Heroic Strike"] = {
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = { 1, 1, 1 },
-			need_target = true,
-			min_rage = 80,
-			also_lit_on_aura = "Ultimatum",
-		},
-		{
-			type = "COOLDOWN",
-			note = "RIGHT",
-			color = { 1, 1, 1 },
-			need_target = true,
-			need_aura = "Ultimatum",
-		},
-	},
-	["Cleave"] = Config.template.melee(55),
 	["Raging Blow"] = {
 		alias = "Crushing Blow",
 		type = "COOLDOWN",
@@ -261,13 +221,6 @@ Config.spells = {
 		need_target = true,
 		dim_on_charges = 1,
 	},
-	["Colossus Smash"] = {
-		type = "COOLDOWN",
-		note = "RIGHT",
-		color = Colors.red,
-		need_target = true,
-		show_debuff = true,
-	},
 	["Blood Fury"] = { 
 		type = "COOLDOWN",
 		note = "RIGHT",
@@ -280,35 +233,24 @@ Config.spells = {
 		color = Colors.orange,
 		dim_on_enrage = true,
 	},
-	["Inner Rage"] = Config.template.reactive,
-	["Skull Banner"] = {
-		type = "COOLDOWN",
-		note = "RIGHT",
-		color = Colors.violet,
-	},
-	["Storm Bolt"] = {
-		type = "COOLDOWN",
-		note = "RIGHT",
-		color = Colors.violet,
-	},
 	["Avatar"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.violet,
 		show_buff = true,
 	},
-	["Disarm"] = Config.template.attack,
-	["Demoralizing Banner"] = {
+	["Pummel"] = Config.template.attack,
+	["Siegebreaker"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
-		color = Colors.green,
+		color = Colors.orange,
+		need_target = true,
+		show_debuff = "Siegebreaker",
 	},
-	["Pummel"] = Config.template.attack,
 	["Ravager"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
-		color = Colors.red,
-		show_buff = true,
+		color = Colors.orange,
 	},
 
 	["Shadow Bolt"] = Config.template.attack,
