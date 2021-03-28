@@ -22,6 +22,10 @@ function Utils:FindSpell(name)
 		return nil, "Trinket 2"
 	end
 	local slot_id = 1
+	local numSpellBookItems = self:GetNumSpellBookItems()
+	if not numSpellBookItems or numSpellBookItems < 1 then
+		return nil
+	end
 	for slot_id = 1, self:GetNumSpellBookItems() do
 		local full_name = GetSpellBookItemName(slot_id, BOOKTYPE_SPELL)
 		if not full_name then return nil end
