@@ -224,7 +224,7 @@ function Spell:UpdateCooldown(event, unit)
 		end
 	end
 
-	local spell, _, _, _, _, endTime = UnitCastingInfo("player")
+	local spell, _, _, _, endTime = UnitCastingInfo("player")
 	if endTime and endTime > self.bar_start * 1000 then
 		self.bar_start = endTime / 1000
 	end
