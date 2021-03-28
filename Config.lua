@@ -82,12 +82,77 @@ Config.template = {
 	end,
 }
 
-Config.gcd_spells = {"Wild Strike", "Devastate", "Devastator", "Shadow Bolt"}
+Config.gcd_spells = {"Festering Strike", "Wild Strike", "Devastate", "Devastator", "Shadow Bolt", "Demon's Bite", "Sinister Strike", "Sunfire", "Barbed Shot"}
 Config.enrage_auras = {"Enrage"}
 
 Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn"}
 
 Config.spells = {
+--Druid Begin
+	["Solar Beam"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.yellow,
+		need_target = true,
+	},	
+	["Cenarion Ward"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.yellow,
+	},		
+	["Nature's Swiftness"] = {
+		type = "SELFBUFF",
+		note = "RIGHT",
+		color = Colors.blue,
+	},	
+	["Ironbark"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+	},
+	["Barkskin"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+	},	
+	["Convoke the Spirits"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},		
+--Druid End
+
+--Death Knight Begin
+	["Anti-Magic Shell"] = {
+		type = "SELFBUFF",
+		note = "RIGHT",
+		color = Colors.green,
+		show_buff = true,
+	},
+	["Icebound Fortitude"] = {
+		type = "SELFBUFF",
+		note = "RIGHT",
+		color = Colors.blue,
+		show_buff = true,
+	},	
+	["Mind Freeze"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.yellow,
+		need_target = true,
+	},	
+	["Dark Transformation"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+	},		
+	["Abomination Limb"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},		
+--Death Knight End	
+--Warrior Begin
 	["Bloodthirst"] = {
 		alias = "Bloodbath",
 		type = "COOLDOWN",
@@ -101,6 +166,12 @@ Config.spells = {
 		color = Colors.red,
 		need_target = true,
 	},
+	["Warbreaker"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},	
 	["Enrage"] = {
 		type = "SELFBUFF",
 		note = "NONE",
@@ -252,7 +323,7 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.orange,
 	},
-
+--Warrior End
 	["Shadow Bolt"] = Config.template.attack,
 	["Immolate"] = Config.template.dot,
 	["Corruption"] = Config.template.dot,
