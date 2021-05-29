@@ -8,7 +8,7 @@ local LAYOUT = {
 	right_note = { height = 16, width = 16, offset = 0, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Rightarrow" },
 	left_note = { height = 16, width = 16, offset = -16, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Leftarrow" },
 	center_note = { height = 16, width = 16, offset = -8, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Circle" },
-	bridge = { x = 20, width = 5, offset = -2.5, color = {1,1,1,.4} }
+	bridge = { x = 20, width = 3, offset = -2.5, color = {1,1,1,.4} }
 }
 
 
