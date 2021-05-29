@@ -230,6 +230,7 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.orange,
 		dim_unless_enrage = true,
+		show_buff = true,
 	},
 	["Shockwave"] = Config.template.instant_aoe,
 	["Sweeping Strikes"] = {
