@@ -175,7 +175,7 @@ function Spell:BuffEnd(get_buff, only_self)
 	end
 	if self.spell_info.shared_buffs then
 		for _, shared_debuff in ipairs(self.spell_info.shared_buffs) do
-			name, _, _, count, _, _, expires, caster = get_buff(self, shared_debuff)
+			name, _, count, _, _, expires, caster = get_buff(self, shared_debuff)
 			if (name and (not only_self or caster == "player")) then
 				total_count = total_count + count
                 if ((not self.spell_info.stacks) or (not count) or count >= self.spell_info.stacks) then
