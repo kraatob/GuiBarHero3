@@ -127,6 +127,8 @@ function MainFrame:CreateBridgeFrame()
 	local tex = bridge_frame:CreateTexture("bridge", OVERLAY)
 	tex:SetColorTexture(unpack(LAYOUT.bridge.color))
 	tex:SetAllPoints()
+	bridge_frame.tex = tex
+	main_frame.bridge_frame = bridge_frame
 end
 
 function MainFrame:CreateGcdFrame()
@@ -367,15 +369,15 @@ end
 
 function MainFrame:DrawGcd()
 	local gcd_away = (self.gcd:GetNext() - GetTime()) 
-	local alpha = 1 + gcd_away
-	if alpha > 1 then 
-		alpha = 1
-	end
-	if alpha > 0 then
+	local alpha = 1 - math.abs(gcd_away)
+	local bridge_alpha = math.min(1 - gcd_away, 1)
+	local x = LAYOUT.bridge.x + LAYOUT.main.border + gcd_away * LAYOUT.bar.speed - 1.5
+	if alpha > 0 and x > 0 then
+		self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
 		self.gcd_frame.tex:SetVertexColor(1, 1, 1, alpha)
 		self.gcd_frame:Show()
-		self.gcd_frame:SetPoint("TOPLEFT", LAYOUT.bridge.x + LAYOUT.main.border + gcd_away * LAYOUT.bar.speed - 1.5, -LAYOUT.main.border + 1)
-		self.gcd_frame:SetPoint("BOTTOMLEFT", LAYOUT.bridge.x + LAYOUT.main.border + gcd_away * LAYOUT.bar.speed - 1.5, LAYOUT.main.border - 1)
+		self.gcd_frame:SetPoint("TOPLEFT", x, -LAYOUT.main.border + 1)
+		self.gcd_frame:SetPoint("BOTTOMLEFT", x, LAYOUT.main.border - 1)
 	else
 		self.gcd_frame:Hide()
 	end

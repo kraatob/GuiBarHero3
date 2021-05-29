@@ -82,7 +82,7 @@ Config.template = {
 	end,
 }
 
-Config.gcd_spells = {"Festering Strike", "Wild Strike", "Devastate", "Devastator", "Shadow Bolt", "Demon's Bite", "Sinister Strike", "Sunfire", "Barbed Shot"}
+Config.gcd_spells = {"Whirlwind"}
 Config.enrage_auras = {"Enrage"}
 
 Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn"}
