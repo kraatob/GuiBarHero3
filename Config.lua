@@ -52,15 +52,16 @@ Config.template = {
 		color = {1, 0.3, 0},
 		subtract_cast_time = true,
 	},
-	debuff = function(count, shared, show) 
+	debuff = function(count, shared, debuff_name, left)
 		return { type = "DEBUFF",
-			note = count and "LEFT" or "CENTER",
+			note = left and "LEFT" or (count and "LEFT" or "CENTER"),
 			color = Colors.green,
 			stacks = count or 0,
 			shared_buffs = shared or {},
 			show_stack_count = count,
-			show_debuff = show, 
+			show_debuff = debuff_name,
 			needs_target = true,
+			note_at_end = left,
 		}
 	end,
 	melee = function(rage) 
@@ -85,7 +86,7 @@ Config.template = {
 Config.gcd_spells = {"Whirlwind"}
 Config.enrage_auras = {"Enrage"}
 
-Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn"}
+Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn", "Warbreaker"}
 
 Config.spells = {
 --Druid Begin
@@ -169,8 +170,16 @@ Config.spells = {
 	["Warbreaker"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
-		color = Colors.red,
+		color = Colors.violet,
 		need_target = true,
+		show_debuff = "Colossus Smash",
+	},	
+	["Colossus Smash"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+		need_target = true,
+		show_debuff = "Colossus Smash",
 	},	
 	["Enrage"] = {
 		type = "SELFBUFF",
@@ -193,16 +202,24 @@ Config.spells = {
 		need_target = true,
 		hide_on_dim = true,
 	},
-	["Condemn"] = Config.template.attack,
-	["Overpower"] = Config.template.reactive,
+	["Condemn"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+		need_target = true,
+		hide_on_dim = true,
+		use_spell_for_usability = "Execute",
+	},
+	["Overpower"] = Config.template.attack,
 	["Mortal Strike"] = {
-		Config.template.attack,
 		{
 			type = "COOLDOWN",
 			note = "RIGHT",
 			color = Colors.red,
 			need_target = true,
-			min_rage = 65,
+			show_buff_count = "Overpower",
+			-- dim_on_missing_buff = "Overpower",
+			-- dim_on_missing_buff_count = 2,
 		},
 	},
 
@@ -226,17 +243,26 @@ Config.spells = {
 	},
 	["Shield Slam"] = Config.template.attack,
 	["Bladestorm"] = {
-		type = "COOLDOWN",
-		note = "RIGHT",
-		color = Colors.orange,
-		dim_unless_enrage = true,
-		show_buff = true,
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.orange,
+			dim_unless_enrage = true,
+			show_buff = true,
+		},
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.orange,
+			show_buff = true,
+		},
 	},
 	["Shockwave"] = Config.template.instant_aoe,
 	["Sweeping Strikes"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.orange,
+		show_buff = true,
 	},
 	["Deadly Calm"] = {
 		type = "COOLDOWN",
@@ -275,9 +301,9 @@ Config.spells = {
 		color = Colors.blue,
 		show_buff = true,
 	},
-	["Demoralizing Shout"] = Config.template.debuff(nil, {"Demoralizing Roar"}, true),
+	["Demoralizing Shout"] = Config.template.debuff(nil, {}, "Demoralizing Shout"),
 	["Hamstring"] = Config.template.debuff(),
-	["Thunder Clap"] = { Config.template.debuff(nil, {"Weakened Blows", "Frost Fever"}), Config.template.instant_aoe },
+	["Thunder Clap"] = { Config.template.debuff(nil, {}), Config.template.instant_aoe },
 	["Raging Blow"] = {
 		alias = "Crushing Blow",
 		type = "COOLDOWN",
@@ -324,6 +350,7 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.orange,
 	},
+	["Rend"] = Config.template.debuff(nil, {}, "Rend", true),
 --Warrior End
 	["Shadow Bolt"] = Config.template.attack,
 	["Immolate"] = Config.template.dot,

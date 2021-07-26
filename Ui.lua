@@ -581,8 +581,14 @@ function Bar:Draw()
 			self:DrawEmpty(false)
 			self:DrawEmpty(true)
 		else
-			local note_x = (bar_start - time) * LAYOUT.bar.speed + LAYOUT.bridge.x
-			local x = note_x
+			local note_time
+			if self.spell_info.note_at_end then
+				note_time = bar_end or 0
+			else
+				note_time = bar_start
+			end
+			local note_x = (note_time - time) * LAYOUT.bar.speed + LAYOUT.bridge.x
+			local x = (bar_start - time) * LAYOUT.bar.speed + LAYOUT.bridge.x
 			if x <= 0 then
 				x = 0
 			end

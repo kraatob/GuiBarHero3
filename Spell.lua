@@ -158,12 +158,12 @@ function Spell:UpdateBuff(get_buff)
 	end
 end
 
-function Spell:BuffEnd(get_buff, only_self)
+function Spell:BuffEnd(get_buff, only_self, spell_name)
 	local name, count, expires
 	local total_count = 0
 	local latest_expire = 0
 	local found = false
-	name, _, count, _, _, expires, caster = get_buff(self, self.spell_name)
+	name, _, count, _, _, expires, caster = get_buff(self, spell_name or self.spell_name)
 	if (name and (not only_self or caster == "player")) then
 		total_count = total_count + count
 		if ((not self.spell_info.stacks) or (not count) or count >= self.spell_info.stacks) then
@@ -278,7 +278,7 @@ function Spell:ShowBuffOrDebuff(last_bar_start)
 	if self.spell_info.show_debuff or self.spell_info.show_buff then
 		local expires
 		if self.spell_info.show_debuff then
-			expires = self:BuffEnd(self.GetDebuff, true)
+			expires = self:BuffEnd(self.GetDebuff, true, self.spell_info.show_debuff)
 		else
 			expires = self:BuffEnd(self.GetBuff)
 		end
@@ -310,35 +310,38 @@ function Spell:UpdateSlotItem(event, unit)
 	local last_bar_start = self.bar_start or 0
 	self.bar_end = nil
 	local start, duration, enable = GetInventoryItemCooldown("player", self.spell_info.slot_id)
-	if enable == 1 then
-		if duration > 0 then
-			local expires, buff_texture
-			local item_id = GetInventoryItemID("player", self.spell_info.slot_id)
-			local name, _, _, _, _, _, _, _, _, item_texture = GetItemInfo(item_id)
-			_, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", name)
-			if not expires then
-				-- attempt to guess by texture
-				for i = 1, 40 do
-					_, _, buff_texture, _, _, _, expires = self:FindByName(UnitBuff, "player", i)
-					if (not buff_texture) or buff_texture == item_texture then
-						break
-					end
+	local expires, buff_texture
+	local item_id = GetInventoryItemID("player", self.spell_info.slot_id)
+	if item_id then
+		local name, _, _, _, _, _, _, _, _, item_texture = GetItemInfo(item_id)
+		_, _, _, _, _, expires = self:FindByName(UnitBuff, "player", name)
+		if not expires then
+			-- attempt to guess by texture
+			for i = 1, 40 do
+				_, buff_texture, _, _, _, expires = self:FindByName(UnitBuff, "player", i)
+				if (not buff_texture) or buff_texture == item_texture then
+					break
 				end
 			end
-
+		end
+	end
+	if enable == 1 then
+		if duration > 0 then
 			if expires and expires > 0 then
 				self.bar_start = nil
 				self.bar_end = expires
 			else
 				self.bar_start = start + duration
 			end
+        elseif expires and expires > 0 then
+			self.bar_start = expires
 		elseif last_bar_start > GetTime() + EPS.time then
 			self.bar_start = 0
 		else
 			self.bar_start = last_bar_start
 		end
 	else
-		self.bar_start = nil
+		self.bar_start = expires
 	end
 end
 
@@ -367,8 +370,11 @@ function Spell:UpdateDimInfo(bar_start)
 	local dim_start = nil
 	local dim_end = nil
 
-	if (self.slot_id and (not IsUsableSpell(self.spell_name)) or (SpellHasRange(self.spell_name) and IsSpellInRange(self.spell_name, "target") == 0)) then
-		dim_start = bar_start
+	if self.slot_id then
+		local usable = IsUsableSpell(self.spell_info.use_spell_for_usability or self.spell_name)
+		if (not usable) or (SpellHasRange(self.spell_name) and IsSpellInRange(self.spell_name, "target") == 0) then
+			dim_start = bar_start
+		end
 	end
 
 	if self.spell_info.min_rage and UnitMana("player") < self.spell_info.min_rage then
@@ -409,8 +415,8 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.dim_on_missing_buff then
-		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
-		if not name then
+		name, _, count, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
+		if not name or (self.spell_info.dim_on_missing_buff_count and count < self.spell_info.dim_on_missing_buff_count) then
 			dim_start = bar_start
 		end
 	end
