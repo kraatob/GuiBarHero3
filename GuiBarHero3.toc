@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 90100
 ## Title: GuiBarHero3
 ## Notes: Visualize cooldowns and buff durations Guitar-Hero-style.
 ## Author: TK
