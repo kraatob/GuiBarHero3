@@ -26,3 +26,4 @@ EventRegistry.lua
 Ui.lua
 Gcd.lua
 Spell.lua
+SwingTimer.lua

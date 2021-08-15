@@ -8,7 +8,8 @@ local LAYOUT = {
 	right_note = { height = 16, width = 16, offset = 0, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Rightarrow" },
 	left_note = { height = 16, width = 16, offset = -16, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Leftarrow" },
 	center_note = { height = 16, width = 16, offset = -8, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Circle" },
-	bridge = { x = 20, width = 3, offset = -2.5, color = {1,1,1,.4} }
+	bridge = { x = 20, width = 3, offset = -2.5, color = {1,1,1,.4} },
+	swing_timer = { width = 2, color = {1,1,0.1,.2} }
 }
 
 
@@ -37,6 +38,7 @@ function MainFrame:Initialize()
 	self:CreateProfileFrame()
 	self:CreateBridgeFrame()
 	self:CreateGcdFrame()
+	self:CreateSwingTimerFrame()
 
 	self.current_bars = {}
 	self.current_icons = {}
@@ -134,12 +136,23 @@ end
 function MainFrame:CreateGcdFrame()
 	local gcd_frame = CreateFrame("Frame", "GcdFrame", self.frame)
 	gcd_frame:SetFrameLevel(5)
-	gcd_frame:SetWidth(3)
+	gcd_frame:SetWidth(LAYOUT.bridge.width)
 	local tex = gcd_frame:CreateTexture("gcd", OVERLAY)
 	tex:SetColorTexture(unpack(LAYOUT.bridge.color))
 	tex:SetAllPoints()
 	gcd_frame.tex = tex
 	main_frame.gcd_frame = gcd_frame
+end
+
+function MainFrame:CreateSwingTimerFrame()
+	local swing_timer_frame = CreateFrame("Frame", "SwingTimerFrame", self.frame)
+	swing_timer_frame:SetFrameLevel(5)
+	swing_timer_frame:SetWidth(LAYOUT.swing_timer.width)
+	local tex = swing_timer_frame:CreateTexture("swing_timer", OVERLAY)
+	tex:SetColorTexture(unpack(LAYOUT.swing_timer.color))
+	tex:SetAllPoints()
+	swing_timer_frame.tex = tex
+	main_frame.swing_timer_frame = swing_timer_frame
 end
 
 
@@ -285,6 +298,10 @@ function MainFrame:RefreshBars()
 		self.gcd:Release()
 	end
 	self.gcd = GuiBarHero.Gcd:Create(self.gcd_frame)
+	if self.swing_timer then
+		self.swing_timer:Release()
+	end
+	self.swing_timer = GuiBarHero.SwingTimer:Create(self.swing_timer_frame)
 	self:SetBars(GuiBarHero.settings:GetBars())
 	self:SetBars(GuiBarHero.settings:GetIcons(), true)
 end
@@ -359,6 +376,7 @@ function MainFrame:OnUpdate()
 	self = self.owner
 	self.event_registry:Run()
 	self:DrawGcd()
+	self:DrawSwingTimer()
 	for _, bar in pairs(self.current_bars) do
 		bar:Draw()
 	end
@@ -367,20 +385,31 @@ function MainFrame:OnUpdate()
 	end
 end
 
+function MainFrame:DrawTimer(frame, away, alpha)
+	local x = LAYOUT.bridge.x + LAYOUT.main.border + away * LAYOUT.bar.speed - 1.5
+	if alpha > 0 and x > 0 then
+		frame.tex:SetVertexColor(1, 1, 1, alpha)
+		frame:Show()
+		frame:SetPoint("TOPLEFT", x, -LAYOUT.main.border + 1)
+		frame:SetPoint("BOTTOMLEFT", x, LAYOUT.main.border - 1)
+	else
+		frame:Hide()
+	end
+end
+
 function MainFrame:DrawGcd()
 	local gcd_away = (self.gcd:GetNext() - GetTime()) 
 	local alpha = 1 - math.abs(gcd_away)
 	local bridge_alpha = math.min(1 - gcd_away, 1)
-	local x = LAYOUT.bridge.x + LAYOUT.main.border + gcd_away * LAYOUT.bar.speed - 1.5
-	if alpha > 0 and x > 0 then
-		self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
-		self.gcd_frame.tex:SetVertexColor(1, 1, 1, alpha)
-		self.gcd_frame:Show()
-		self.gcd_frame:SetPoint("TOPLEFT", x, -LAYOUT.main.border + 1)
-		self.gcd_frame:SetPoint("BOTTOMLEFT", x, LAYOUT.main.border - 1)
-	else
-		self.gcd_frame:Hide()
-	end
+	self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
+	self:DrawTimer(self.gcd_frame, gcd_away, alpha)
+end
+
+
+function MainFrame:DrawSwingTimer()
+	local swing_away = (self.swing_timer:GetNext() - GetTime()) 
+	self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
+	self:DrawTimer(self.swing_timer_frame, swing_away, 1)
 end
 
 

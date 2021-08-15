@@ -167,6 +167,11 @@ Config.spells = {
 		color = Colors.red,
 		need_target = true,
 	},
+	["Charge"] = {
+		type = "COOLDOWN",
+		ignore_usable = true,
+		need_target = true,
+	},
 	["Warbreaker"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
