@@ -370,7 +370,7 @@ function Spell:UpdateDimInfo(bar_start)
 	local dim_start = nil
 	local dim_end = nil
 
-	if self.slot_id then
+	if self.slot_id and not self.spell_info.ignore_usable then
 		local usable = IsUsableSpell(self.spell_info.use_spell_for_usability or self.spell_name)
 		if (not usable) or (SpellHasRange(self.spell_name) and IsSpellInRange(self.spell_name, "target") == 0) then
 			dim_start = bar_start

@@ -210,7 +210,13 @@ Config.spells = {
 		hide_on_dim = true,
 		use_spell_for_usability = "Execute",
 	},
-	["Overpower"] = Config.template.attack,
+	["Overpower"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+		dim_on_charges = 1,
+	},
 	["Mortal Strike"] = {
 		{
 			type = "COOLDOWN",
@@ -218,6 +224,14 @@ Config.spells = {
 			color = Colors.red,
 			need_target = true,
 			show_buff_count = "Overpower",
+			-- dim_on_missing_buff = "Overpower",
+			-- dim_on_missing_buff_count = 2,
+		}, {
+			type = "DEBUFF",
+			note = "LEFT",
+			color = Colors.green,
+			show_debuff = "Deep Wounds",
+			ignore_usable = true,
 			-- dim_on_missing_buff = "Overpower",
 			-- dim_on_missing_buff_count = 2,
 		},
