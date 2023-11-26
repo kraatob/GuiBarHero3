@@ -344,7 +344,7 @@ function MainFrame:SetBars(spells, icons)
 				end
 			end
 			if name then 
-				local new_bar = Bar:Aquire(frame, icons, self.event_registry)
+				local new_bar = Bar:Aquire(frame, icons, self.event_registry, self.gcd)
 				if icons then
 					new_bar:SetIconPosition((i - 1) * (LAYOUT.large_icon.width + LAYOUT.large_icon.skip), 0, LAYOUT.large_icon.width, LAYOUT.large_icon.height)
 				else
@@ -409,14 +409,21 @@ end
 function MainFrame:DrawSwingTimer()
 	local swing_away = (self.swing_timer:GetNext() - GetTime()) 
 	self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
-	self:DrawTimer(self.swing_timer_frame, swing_away, 1)
+	local x = LAYOUT.bridge.x + LAYOUT.main.border + swing_away * LAYOUT.bar.speed - LAYOUT.swing_timer.width / 2 
+	local tex = self.swing_timer_frame.tex
+	if x > 0 then
+		tex:SetPoint("TOPLEFT", x, 0)
+		tex:Show()
+	else
+		tex:Hide()
+	end
 end
 
 
 -------
 -- Bars
 
-function Bar:Aquire(frame, icon_only, event_registry)
+function Bar:Aquire(frame, icon_only, event_registry, gcd)
 	local pool
 	if icon_only then
 		self.icon_pool = self.icon_pool or {}
@@ -427,7 +434,7 @@ function Bar:Aquire(frame, icon_only, event_registry)
 	end
 	local bar = table.remove(pool)
 	if not bar then
-		bar = Bar:Create(frame, icon_only, event_registry)
+		bar = Bar:Create(frame, icon_only, event_registry, gcd)
 	end
 	return bar
 end
@@ -444,16 +451,17 @@ function Bar:Release()
 	end
 end
 
-function Bar:Create(parent, icon_only, event_registry)
+function Bar:Create(parent, icon_only, event_registry, gcd)
 	local bar = {} 
 	setmetatable(bar, Bar_mt)
-	bar:Initialize(parent, icon_only, event_registry)
+	bar:Initialize(parent, icon_only, event_registry, gcd)
 
 	return bar
 end
 
-function Bar:Initialize(parent, icon_only, event_registry)
+function Bar:Initialize(parent, icon_only, event_registry, gcd)
 	self.event_registry = event_registry
+	self.gcd = gcd
 	self.icon_only = icon_only
 	self.next_note = 0
 	self.spell_info = GuiBarHero.Config.template.none
@@ -582,7 +590,7 @@ function Bar:SetIconPosition(x, y, width, height)
 end
 
 function Bar:SetSpell(name, alt)
-	self.spell = GuiBarHero.Spell:Create(name, alt, self.event_registry)
+	self.spell = GuiBarHero.Spell:Create(name, alt, self.event_registry, self.gcd)
 	self.spell_info = self.spell:GetInfo()
 	local note_type = self.spell_info.note
 	if note_type == "LEFT" then

@@ -7,15 +7,16 @@ function Spell:Release()
 	self.event_registry:Unregister(self)
 end
 
-function Spell:Create(spell_name, alternative, event_registry)
+function Spell:Create(spell_name, alternative, event_registry, gcd)
 	local spell = {}
 	setmetatable(spell, Spell_mt)
-	spell:Initialize(spell_name, alternative, event_registry)
+	spell:Initialize(spell_name, alternative, event_registry, gcd)
 	return spell
 end
 
-function Spell:Initialize(spell_name, alternative, event_registry)
+function Spell:Initialize(spell_name, alternative, event_registry, gcd)
 	self.event_registry = event_registry
+	self.gcd = gcd
 
 	local slot_id, spell_name = GuiBarHero.Utils:FindSpell(spell_name)
 	local spell_info = spell_name and GuiBarHero.Config.spells[spell_name] or GuiBarHero.Config.template.default
@@ -116,7 +117,7 @@ function Spell:UpdateBuff(get_buff)
 	latest_expire = (latest_expire or 0)
 
 	local start, duration = GetSpellCooldown(self.slot_id, BOOKTYPE_SPELL)
-	if duration and (duration > 1.5 or (duration > 0 and self.bar_start and self.bar_start > start + duration + EPS.time)) and start + duration > latest_expire then
+	if duration and (duration > self.gcd:GetDuration() or (duration > 0 and self.bar_start and self.bar_start > start + duration + EPS.time)) and start + duration > latest_expire then
 		latest_expire = start + duration
 		found = true
 	end
@@ -211,7 +212,7 @@ function Spell:UpdateCooldown(event, unit)
 
 	if duration and duration > 0 then
 		end_time = start + duration
-		if duration > 1.5 or (not last_bar_start) or last_bar_start > end_time + EPS.time  then
+		if duration > self.gcd:GetDuration() or (not last_bar_start) or last_bar_start > end_time + EPS.time then
 			self.bar_start = end_time
 		else
 			self.bar_start = last_bar_start
