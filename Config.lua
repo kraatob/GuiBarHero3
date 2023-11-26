@@ -83,10 +83,8 @@ Config.template = {
 	end,
 }
 
-Config.gcd_spells = {"Whirlwind"}
+Config.gcd_spells = {"Hamstring", "Azure Strike"}
 Config.enrage_auras = {"Enrage"}
-
-Config.unknown_spells = {"Execute", "Whirlwind", "Revenge", "Condemn", "Warbreaker"}
 
 Config.spells = {
 --Druid Begin
@@ -153,6 +151,58 @@ Config.spells = {
 		color = Colors.orange,
 	},		
 --Death Knight End	
+--Evoker Begin
+	["Pyre"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},
+	["Disintegrate"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},
+	["Living Flame"] = {
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.red,
+			need_target = true,
+		}, {
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.red,
+			need_target = true,
+			dim_on_missing_buff = "Burnout",
+		},
+	},
+	["Fire Breath"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},
+	["Eternity Surge"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},
+	["Dragonrage"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+		show_buff = true,
+	},
+	["Tip the Scales"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.violet,
+		show_buff = true,
+	},
+	["Blessing of the Bronze"] = Config.template.self_buff({"Blessing of the Bronze"}),
+--Evoker End
 --Warrior Begin
 	["Bloodthirst"] = {
 		alias = "Bloodbath",
@@ -160,6 +210,7 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.red,
 		need_target = true,
+		show_buff_count = "Furious Bloodthirst",
 	},
 	["Bloodbath"] = {
 		type = "COOLDOWN",
@@ -193,12 +244,19 @@ Config.spells = {
 		invert = true,
 	},
 	["Whirlwind"] = {
-		type = "COOLDOWN",
-		note = "RIGHT",
-		color = Colors.red,
-		need_target = false,
-		show_buff_count = "Whirlwind",
-		dim_on_missing_buff = "Whirlwind",
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.red,
+			need_target = false,
+			show_buff_count = "Whirlwind",
+		}, {
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.orange,
+			show_buff_count = "Whirlwind",
+			dim_on_buff = "Whirlwind",
+		}
 	},
 	["Execute"] = {
 		type = "COOLDOWN",
@@ -241,8 +299,15 @@ Config.spells = {
 			-- dim_on_missing_buff_count = 2,
 		},
 	},
+	["Onslaught"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+		need_target = true,
+	},
 
 	["Victory Rush"] = Config.template.attack,
+	["Impending Victory"] = Config.template.attack,
 	["Battle Shout"] = {
 		Config.template.self_buff({"Horn of Winter", "Roar of Courage", "Trueshot Aura"}),
 		{
@@ -261,6 +326,12 @@ Config.spells = {
 		dim_on_missing_buff = "Revenge!",
 	},
 	["Shield Slam"] = Config.template.attack,
+	["Slam"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+	},
 	["Bladestorm"] = {
 		{
 			type = "COOLDOWN",
@@ -277,6 +348,19 @@ Config.spells = {
 		},
 	},
 	["Shockwave"] = Config.template.instant_aoe,
+	["Spear of Bastion"] = {
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.blue,
+			dim_unless_enrage = true,
+		},
+		{
+			type = "COOLDOWN",
+			note = "RIGHT",
+			color = Colors.blue,
+		},
+	},
 	["Sweeping Strikes"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
@@ -320,6 +404,12 @@ Config.spells = {
 		color = Colors.blue,
 		show_buff = true,
 	},
+	["Spell Block"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.blue,
+		show_buff = true,
+	},
 	["Demoralizing Shout"] = Config.template.debuff(nil, {}, "Demoralizing Shout"),
 	["Hamstring"] = Config.template.debuff(),
 	["Thunder Clap"] = { Config.template.debuff(nil, {}), Config.template.instant_aoe },
@@ -330,6 +420,7 @@ Config.spells = {
 		color = Colors.red,
 		need_target = true,
 		dim_on_charges = 1,
+		show_buff_count = "Reckless Abandon",
 	},
 	["Crushing Blow"] = {
 		type = "COOLDOWN",
@@ -337,6 +428,7 @@ Config.spells = {
 		color = Colors.red,
 		need_target = true,
 		dim_on_charges = 1,
+		show_buff_count = "Reckless Abandon",
 	},
 	["Blood Fury"] = { 
 		type = "COOLDOWN",
@@ -368,6 +460,8 @@ Config.spells = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.orange,
+		show_buff = "Hurricane",
+		show_buff_count = "Hurricane",
 	},
 	["Rend"] = Config.template.debuff(nil, {}, "Rend", true),
 --Warrior End
