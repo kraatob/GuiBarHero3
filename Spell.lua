@@ -281,7 +281,7 @@ function Spell:ShowBuffOrDebuff(last_bar_start)
 		if self.spell_info.show_debuff then
 			expires = self:BuffEnd(self.GetDebuff, true, self.spell_info.show_debuff)
 		else
-			expires = self:BuffEnd(self.GetBuff)
+			expires = self:BuffEnd(self.GetBuff, true, self.spell_info.show_buff == true and self.spell_name or self.spell_info.show_buff)
 		end
 		if expires then
 			self.bar_start = nil
@@ -409,16 +409,24 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name, _, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
+		name = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
 		if name then
 			dim_start = nil
 		end
 	end
 
 	if self.spell_info.dim_on_missing_buff then
-		name, _, count, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
+		name, _, count = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
 		if not name or (self.spell_info.dim_on_missing_buff_count and count < self.spell_info.dim_on_missing_buff_count) then
 			dim_start = bar_start
+		end
+	end
+
+	if self.spell_info.dim_on_buff then
+		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_buff)
+		if name then
+			dim_start = bar_start
+			dim_end = expires
 		end
 	end
 
