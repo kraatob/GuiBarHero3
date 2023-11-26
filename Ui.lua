@@ -42,6 +42,8 @@ function MainFrame:Initialize()
 
 	self.current_bars = {}
 	self.current_icons = {}
+	self.spell_nr_by_y = {}
+	self.visible_bars = 0
 
 	self.event_registry = GuiBarHero.EventRegistry:Create(self.frame)
 end
@@ -192,8 +194,8 @@ end
 function MainFrame:BarClick(button)
 	local _, rel_y = self.owner:GetRelativeCursorPosition(self)
 	self = self.owner
-	nr = math.ceil((1-rel_y) * (#self.current_bars))
-	insert_nr = math.ceil((1-rel_y) * (#self.current_bars) + 0.5)
+	nr = self.spell_nr_by_y[math.ceil((1-rel_y) * self.visible_bars)]
+	insert_nr = self.spell_nr_by_y[math.ceil((1-rel_y) * self.visible_bars + 0.5)]
 	self:SpellClick(button, nr, insert_nr, false)
 end
 
@@ -214,22 +216,10 @@ function MainFrame:SpellClick(button, nr, insert_nr, icons)
 end
 
 function MainFrame:SpellDropped(nr, icons)
-	local info_type, id, link = GetCursorInfo()
+	local info_type, _, link, spell_id = GetCursorInfo()
 	local name
 	if info_type == "spell" then
-		if id == 0 then
-			-- for some reason, sometimes the cursor will not tell us the spell
-			-- in this case we fall back to a rotating list of "known unknown" spells
-			local current
-			if icons then
-				current = GuiBarHero.settings:GetIconSpellName(nr)
-			else
-				current = GuiBarHero.settings:GetBarSpellName(nr)
-			end
-			name = GuiBarHero.settings:GetNextUnknown(nr, current)
-		else
-			name = GetSpellBookItemName(id, BOOKTYPE_SPELL)
-		end
+		name = GetSpellInfo(spell_id)
 		if name == "Enraged Regeneration" then
 			name = "Enrage"
 		end
@@ -335,7 +325,7 @@ function MainFrame:SetBars(spells, icons)
 		current_bars = self.current_bars
 		frame = self.frame
 	end
-	local last = 1
+	local y = 0
 	for i = 1, LAYOUT.bar.max do
 		if current_bars[i] then
 			current_bars[i]:Release()
@@ -355,22 +345,28 @@ function MainFrame:SetBars(spells, icons)
 					new_bar:SetIconPosition((i - 1) * (LAYOUT.large_icon.width + LAYOUT.large_icon.skip), 0, LAYOUT.large_icon.width, LAYOUT.large_icon.height)
 				else
 					new_bar:SetPosition(LAYOUT.main.border, 
-						(1 - i) * (LAYOUT.bar.height + LAYOUT.bar.skip) - LAYOUT.main.border - LAYOUT.bar.skip,
+						- y * (LAYOUT.bar.height + LAYOUT.bar.skip) - LAYOUT.main.border - LAYOUT.bar.skip,
 						LAYOUT.bar.width, LAYOUT.bar.height)
 					new_bar:SetIconPosition(-LAYOUT.icon.width - LAYOUT.icon.dist, 
-						(1 - i) * (LAYOUT.bar.height + LAYOUT.bar.skip) - LAYOUT.main.border - 
+						- y * (LAYOUT.bar.height + LAYOUT.bar.skip) - LAYOUT.main.border - 
 						LAYOUT.bar.skip + (LAYOUT.icon.height - LAYOUT.bar.height)/2, 
 						LAYOUT.icon.width, LAYOUT.icon.height)
 				end
 				new_bar:SetSpell(name, spells[i].alt)
 				new_bar:Show()
 				current_bars[i] = new_bar
+				y = y + 1
+				if not icons then
+					self.spell_nr_by_y[y] = i
+					self.spell_nr_by_y[y + 1] = i + 1
+					self.visible_bars = y
+				end
 			end
 		end
 		if spells[i] then last = i end
 	end
 	if not icons then
-		self.frame:SetHeight(last * (LAYOUT.bar.height + LAYOUT.bar.skip) + LAYOUT.bar.skip + 2 * LAYOUT.main.border)
+		self.frame:SetHeight(y * (LAYOUT.bar.height + LAYOUT.bar.skip) + LAYOUT.bar.skip + 2 * LAYOUT.main.border)
 	end
 end
 
