@@ -9,7 +9,7 @@ local LAYOUT = {
 	left_note = { height = 16, width = 16, offset = -16, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Leftarrow" },
 	center_note = { height = 16, width = 16, offset = -8, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Circle" },
 	bridge = { x = 20, width = 3, offset = -2.5, color = {1,1,1,.4} },
-	swing_timer = { width = 2, color = {1,1,0.1,.2} }
+	swing_timer = { height = 8, width = 8, color = {1,1,1,.8}, path = "Interface\\AddOns\\GuiBarHero3\\Textures\\Downarrow" }
 }
 
 
@@ -147,10 +147,16 @@ end
 function MainFrame:CreateSwingTimerFrame()
 	local swing_timer_frame = CreateFrame("Frame", "SwingTimerFrame", self.frame)
 	swing_timer_frame:SetFrameLevel(5)
-	swing_timer_frame:SetWidth(LAYOUT.swing_timer.width)
+	swing_timer_frame:SetPoint("TOPLEFT", 0, -LAYOUT.main.border + 1)
+	swing_timer_frame:SetWidth(LAYOUT.bar.width)
+	swing_timer_frame:SetHeight(LAYOUT.swing_timer.height)
 	local tex = swing_timer_frame:CreateTexture("swing_timer", OVERLAY)
-	tex:SetColorTexture(unpack(LAYOUT.swing_timer.color))
-	tex:SetAllPoints()
+	tex:SetTexture(LAYOUT.swing_timer.path, true)
+	tex:SetBlendMode("ADD")
+	tex:SetVertexColor(unpack(LAYOUT.swing_timer.color))
+	tex:SetDrawLayer("OVERLAY")
+	tex:SetHeight(LAYOUT.swing_timer.height)
+	tex:SetWidth(LAYOUT.swing_timer.width)
 	swing_timer_frame.tex = tex
 	main_frame.swing_timer_frame = swing_timer_frame
 end
@@ -400,7 +406,7 @@ end
 function MainFrame:DrawGcd()
 	local gcd_away = (self.gcd:GetNext() - GetTime()) 
 	local alpha = 1 - math.abs(gcd_away)
-	local bridge_alpha = math.min(1 - gcd_away, 1)
+	local bridge_alpha = math.max(math.min(1 - gcd_away, 1), 0)
 	self.bridge_frame.tex:SetVertexColor(1, 1, 1, bridge_alpha)
 	self:DrawTimer(self.gcd_frame, gcd_away, alpha)
 end
