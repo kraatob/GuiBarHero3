@@ -14,7 +14,6 @@ function Gcd:Create(frame)
 end
 
 function Gcd:Initialize(frame)
-	self.slot = GuiBarHero.Utils:FindFirstSpell(GuiBarHero.Config.gcd_spells)
 	self.next_gcd = 0
 	self.duration = 1.5
 	self.frame = frame
@@ -25,7 +24,7 @@ end
 
 function Gcd:OnEvent()
 	self = self.owner
-	local success, start, duration = pcall(GetSpellCooldown, self.slot, BOOKTYPE_SPELL)
+	local success, start, duration = pcall(GetSpellCooldown, 61304)
 	if success and start and duration then
 		self.next_gcd = start + duration
 		self.duration = duration
