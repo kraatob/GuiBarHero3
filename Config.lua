@@ -203,6 +203,34 @@ Config.spells = {
 	},
 	["Blessing of the Bronze"] = Config.template.self_buff({"Blessing of the Bronze"}),
 --Evoker End
+--Warlock Begin
+	["Immolate"] = Config.template.debuff(nil, {}, "Immolate", true),
+	["Chaos Bolt"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+		show_buff_count = "Backdraft",
+	},
+	["Conflagrate"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		need_target = true,
+		show_charges = true,
+		dim_on_charges = 1,
+	},
+	["Summon Infernal"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},
+	["Cataclysm"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},
+--Warlock End
 --Warrior Begin
 	["Bloodthirst"] = {
 		alias = "Bloodbath",
@@ -465,11 +493,6 @@ Config.spells = {
 	},
 	["Rend"] = Config.template.debuff(nil, {}, "Rend", true),
 --Warrior End
-	["Shadow Bolt"] = Config.template.attack,
-	["Immolate"] = Config.template.dot,
-	["Corruption"] = Config.template.dot,
-	["Bane of Agony"] = Config.template.dot,
-	["Conflagrate"] = Config.template.attack,
 
 	["Trinket 1"] = Config.template.slot_item("Trinket0Slot"),
 	["Trinket 2"] = Config.template.slot_item("Trinket1Slot"),
