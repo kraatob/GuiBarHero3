@@ -18,14 +18,15 @@ function Spell:Initialize(spell_name, alternative, event_registry, gcd)
 	self.event_registry = event_registry
 	self.gcd = gcd
 
-	local slot_id, spell_name = GuiBarHero.Utils:FindSpell(spell_name)
+	local spell_id, spell_name = GuiBarHero.Utils:FindSpell(spell_name)
 	local spell_info = spell_name and GuiBarHero.Config.spells[spell_name] or GuiBarHero.Config.template.default
 	if not spell_info.type then 
 		spell_info = spell_info[((alternative or 1) - 1) % #spell_info + 1]
 	end
+	
 	self.spell_info = spell_info
 	self.spell_name = spell_name or "nil"
-	self.slot_id = slot_id
+	self.spell_id = spell_id
 	self.casting = nil
 	self.bar_start = 0
 	self.bar_end = nil
@@ -82,23 +83,23 @@ function Spell:UpdateDebuff(event, unit)
 end
 
 function Spell:GetBuff(name)
-    return self:FindByName(UnitBuff, "player", name)
+    return self:FindByName("player", name, "HELPFUL")
 end
 
 function Spell:GetDebuff(name)
-    return self:FindByName(UnitDebuff, "target", name)
+    return self:FindByName("target", name, "HELPFUL")
 end
 
-function Spell:FindByName(getter, unit, nameToFind)
+function Spell:FindByName(unit, nameToFind, filter)
 	local buff
 	local i = 1
 	while true do
-		local name, icon, count, debuffType, duration, expirationTime, source = getter(unit, i)
-		if name == nil then
+    local auraData = C_UnitAuras.GetAuraDataByIndex(unit, i, filter)
+		if auraData == nil then
 			break
 		end
-		if name == nameToFind then
-			return name, icon, count, debuffType, duration, expirationTime, source
+		if auraData.name == nameToFind then
+			return auraData.name, auraData.applications or 0, auraData.expirationTime, auraData.sourceUnit
 		end
 		i = i + 1
 	end
@@ -116,7 +117,7 @@ function Spell:UpdateBuff(get_buff)
 
 	latest_expire = (latest_expire or 0)
 
-	local start, duration = GetSpellCooldown(self.slot_id, BOOKTYPE_SPELL)
+	local start, duration = C_Spell.GetSpellCooldown(self.spell_id, BOOKTYPE_SPELL)
 	if duration and (duration > self.gcd:GetDuration() or (duration > 0 and self.bar_start and self.bar_start > start + duration + EPS.time)) and start + duration > latest_expire then
 		latest_expire = start + duration
 		found = true
@@ -164,7 +165,7 @@ function Spell:BuffEnd(get_buff, only_self, spell_name)
 	local total_count = 0
 	local latest_expire = 0
 	local found = false
-	name, _, count, _, _, expires, caster = get_buff(self, spell_name or self.spell_name)
+	name, count, expires, caster = get_buff(self, spell_name or self.spell_name)
 	if (name and (not only_self or caster == "player")) then
 		total_count = total_count + count
 		if ((not self.spell_info.stacks) or (not count) or count >= self.spell_info.stacks) then
@@ -176,7 +177,7 @@ function Spell:BuffEnd(get_buff, only_self, spell_name)
 	end
 	if self.spell_info.shared_buffs then
 		for _, shared_debuff in ipairs(self.spell_info.shared_buffs) do
-			name, _, count, _, _, expires, caster = get_buff(self, shared_debuff)
+			name, count, expires, caster = get_buff(self, shared_debuff)
 			if (name and (not only_self or caster == "player")) then
 				total_count = total_count + count
                 if ((not self.spell_info.stacks) or (not count) or count >= self.spell_info.stacks) then
@@ -208,7 +209,9 @@ function Spell:UpdateCooldown(event, unit)
 
 	if not self:ValidTarget() then return end
 
-	local start, duration = GetSpellCooldown(self.slot_id, BOOKTYPE_SPELL)
+  local cooldownInfo = C_Spell.GetSpellCooldown(self.spell_id)
+	local start = cooldownInfo.startTime
+	local duration = cooldownInfo.duration
 
 	if duration and duration > 0 then
 		end_time = start + duration
@@ -231,7 +234,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.need_aura then
-		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_aura)
+		name, _, expires = self:GetBuff(self.spell_info.need_aura)
 		if name then
 			self.bar_end = expires
 		else
@@ -241,7 +244,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
+		name, _, expires = self:GetBuff(self.spell_info.also_lit_on_aura)
 		if name then
 			self.bar_start = 0
 			self.bar_end = expires
@@ -249,7 +252,7 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.need_no_aura then
-		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.need_no_aura)
+		name, _, expires = self:GetBuff(self.spell_info.need_no_aura)
 		if name and self.bar_start < expires then
 			self.bar_start = expires
 		end
@@ -257,7 +260,7 @@ function Spell:UpdateCooldown(event, unit)
 
 	self.icon_text = nil
 	if self.spell_info.show_buff_count then
-		local found, _, count = self:FindByName(UnitBuff, "player", self.spell_info.show_buff_count)
+		local found, count = self:GetBuff(self.spell_info.show_buff_count)
 		if found then
 			self.icon_text = "" .. count
 		end
@@ -315,11 +318,11 @@ function Spell:UpdateSlotItem(event, unit)
 	local item_id = GetInventoryItemID("player", self.spell_info.slot_id)
 	if item_id then
 		local name, _, _, _, _, _, _, _, _, item_texture = GetItemInfo(item_id)
-		_, _, _, _, _, expires = self:FindByName(UnitBuff, "player", name)
+		_, _, _, _, _, expires = self:GetBuff(name)
 		if not expires then
 			-- attempt to guess by texture
 			for i = 1, 40 do
-				_, buff_texture, _, _, _, expires = self:FindByName(UnitBuff, "player", i)
+				_, buff_texture, _, _, _, expires = self:GetBuff(i)
 				if (not buff_texture) or buff_texture == item_texture then
 					break
 				end
@@ -371,9 +374,9 @@ function Spell:UpdateDimInfo(bar_start)
 	local dim_start = nil
 	local dim_end = nil
 
-	if self.slot_id and not self.spell_info.ignore_usable then
-		local usable = IsUsableSpell(self.spell_info.use_spell_for_usability or self.spell_name)
-		if (not usable) or (SpellHasRange(self.spell_name) and IsSpellInRange(self.spell_name, "target") == 0) then
+	if self.spell_id and not self.spell_info.ignore_usable then
+		local usable = C_Spell.IsSpellUsable(self.spell_info.use_spell_for_usability or self.spell_name)
+		if (not usable) or (C_Spell.SpellHasRange(self.spell_name) and C_Spell.IsSpellInRange(self.spell_name, "target") == 0) then
 			dim_start = bar_start
 		end
 	end
@@ -409,21 +412,21 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.also_lit_on_aura then
-		name = self:FindByName(UnitBuff, "player", self.spell_info.also_lit_on_aura)
+		name = self:GetBuff(self.spell_info.also_lit_on_aura)
 		if name then
 			dim_start = nil
 		end
 	end
 
 	if self.spell_info.dim_on_missing_buff then
-		name, _, count = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_missing_buff)
+		name, _, count = self:GetBuff(self.spell_info.dim_on_missing_buff)
 		if not name or (self.spell_info.dim_on_missing_buff_count and count < self.spell_info.dim_on_missing_buff_count) then
 			dim_start = bar_start
 		end
 	end
 
 	if self.spell_info.dim_on_buff then
-		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", self.spell_info.dim_on_buff)
+		name, _, _, _, _, expires = self:GetBuff(self.spell_info.dim_on_buff)
 		if name then
 			dim_start = bar_start
 			dim_end = expires
@@ -431,11 +434,11 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.dim_on_charges then
-		local currentCharges, maxCharges, cooldownStart, cooldownDuration = GetSpellCharges(self.spell_name)
-		if currentCharges then
-			local chargesToLit = self.spell_info.dim_on_charges - currentCharges + 1
+		local chargesInfo = C_Spell.GetSpellCharges(self.spell_name)
+		if chargesInfo then
+			local chargesToLit = self.spell_info.dim_on_charges - chargesInfo.currentCharges + 1
 			if chargesToLit > 0 and not dim_start then
-				local chargesReady = cooldownStart + chargesToLit * cooldownDuration
+				local chargesReady = chargesInfo.cooldownStartTime + chargesToLit * chargesInfo.cooldownDuration
 				dim_start = bar_start
 				dim_end = chargesReady
 			end
@@ -450,7 +453,7 @@ function Spell:EnrageEnd()
 	local found
 	local latest_expires = 0
 	for _, aura in ipairs(GuiBarHero.Config.enrage_auras) do
-		name, _, _, _, _, expires = self:FindByName(UnitBuff, "player", aura)
+		name, _, expires = self:GetBuff(aura)
 		if name and expires > latest_expires then
 			found = true
 			latest_expires = expires

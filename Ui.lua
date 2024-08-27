@@ -196,7 +196,7 @@ function MainFrame:BarClick(button)
 	self = self.owner
 	nr = self.spell_nr_by_y[math.ceil((1-rel_y) * self.visible_bars)]
 	insert_nr = self.spell_nr_by_y[math.ceil((1-rel_y) * self.visible_bars + 0.5)]
-	self:SpellClick(button, nr, insert_nr, false)
+	self:SpellClick(button, nr or 1, insert_nr or 1, false)
 end
 
 function MainFrame:SpellClick(button, nr, insert_nr, icons)
@@ -219,7 +219,7 @@ function MainFrame:SpellDropped(nr, icons)
 	local info_type, _, link, spell_id = GetCursorInfo()
 	local name
 	if info_type == "spell" then
-		name = GetSpellInfo(spell_id)
+		name = C_Spell.GetSpellInfo(spell_id).name
 		if name == "Enraged Regeneration" then
 			name = "Enrage"
 		end
@@ -251,9 +251,8 @@ function MainFrame:PickupSpell(nr, icons)
 		name = GuiBarHero.settings:GetBarSpellName(nr)
 	end
 	if name then
-		local slot = GuiBarHero.Utils:FindSpell(name)
-		if slot then
-			local _, spell_id = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
+		local _, spell_id = GuiBarHero.Utils:FindSpell(name)
+		if spell_id then
 			PickupSpell(spell_id)
 		end
 	end
@@ -332,11 +331,11 @@ function MainFrame:SetBars(spells, icons)
 			current_bars[i] = nil
 		end
 		if spells[i] then
-			local slot, name = GuiBarHero.Utils:FindSpell(spells[i].name)
+			local _, name = GuiBarHero.Utils:FindSpell(spells[i].name)
 			if not name and spells[i].name then
 				local info = GuiBarHero.Config.spells[spells[i].name]
 				if info and info.alias then
-					slot, name = GuiBarHero.Utils:FindSpell(info.alias)
+					_, name = GuiBarHero.Utils:FindSpell(info.alias)
 				end
 			end
 			if name then 
@@ -366,7 +365,7 @@ function MainFrame:SetBars(spells, icons)
 		if spells[i] then last = i end
 	end
 	if not icons then
-		self.frame:SetHeight(y * (LAYOUT.bar.height + LAYOUT.bar.skip) + LAYOUT.bar.skip + 2 * LAYOUT.main.border)
+		self.frame:SetHeight(math.max(y, 1) * (LAYOUT.bar.height + LAYOUT.bar.skip) + LAYOUT.bar.skip + 2 * LAYOUT.main.border)
 	end
 end
 
@@ -566,13 +565,8 @@ function Bar:RefreshIcon(_, unit)
 		self.icon_tex:SetTexture(GetInventoryItemTexture("player", self.spell_info.slot_id))
 		self.icon_tex:Show()
 	elseif update_spells then
-		local slot_id = self.spell:GetSlotId()
-		if slot_id then
-			self.icon_tex:SetTexture(GetSpellTexture(slot_id, BOOKTYPE_SPELL))
-		    self.icon_tex:Show()
-		else
-			self.icon_tex:Hide()
-		end
+		self.icon_tex:SetTexture(C_Spell.GetSpellTexture(self.spell.spell_id, BOOKTYPE_SPELL))
+		self.icon_tex:Show()
 	end
 end
 
