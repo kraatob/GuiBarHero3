@@ -238,13 +238,14 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.red,
 		need_target = true,
-		show_buff_count = "Furious Bloodthirst",
+		show_buff_count = "Merciless Assault",
 	},
 	["Bloodbath"] = {
 		type = "COOLDOWN",
 		note = "RIGHT",
 		color = Colors.red,
 		need_target = true,
+		show_buff_count = "Merciless Assault",
 	},
 	["Charge"] = {
 		type = "COOLDOWN",
