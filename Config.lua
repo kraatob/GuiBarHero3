@@ -230,6 +230,26 @@ Config.spells = {
 		note = "RIGHT",
 		color = Colors.orange,
 	},
+	["Agony"] = Config.template.debuff(nil, {}, "Agony", true),
+	["Unstable Affliction"] = Config.template.debuff(nil, {}, "Unstable Affliction", true),
+	["Corruption"] = Config.template.debuff(nil, {}, "Corruption", true),
+	["Malefic Rapture"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.red,
+		min_shards = 5,
+		also_lit_on_aura = "Tormented Crescendo",
+	},
+	["Vile Taint"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},
+	["Soul Rot"] = {
+		type = "COOLDOWN",
+		note = "RIGHT",
+		color = Colors.orange,
+	},
 --Warlock End
 --Warrior Begin
 	["Bloodthirst"] = {
