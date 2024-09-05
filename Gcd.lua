@@ -24,10 +24,10 @@ end
 
 function Gcd:OnEvent()
 	self = self.owner
-	local success, start, duration = pcall(GetSpellCooldown, 61304)
-	if success and start and duration then
-		self.next_gcd = start + duration
-		self.duration = duration
+	local cooldownInfo = C_Spell.GetSpellCooldown(61304)
+	if cooldownInfo and cooldownInfo.startTime and cooldownInfo.duration then
+		self.next_gcd = cooldownInfo.startTime + cooldownInfo.duration
+		self.duration = cooldownInfo.duration
 	else
 		self.next_gcd = 0
 		self.duration = 1.5
