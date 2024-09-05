@@ -87,7 +87,7 @@ function Spell:GetBuff(name)
 end
 
 function Spell:GetDebuff(name)
-    return self:FindByName("target", name, "HELPFUL")
+    return self:FindByName("target", name, "HARMFUL")
 end
 
 function Spell:FindByName(unit, nameToFind, filter)
@@ -117,7 +117,9 @@ function Spell:UpdateBuff(get_buff)
 
 	latest_expire = (latest_expire or 0)
 
-	local start, duration = C_Spell.GetSpellCooldown(self.spell_id, BOOKTYPE_SPELL)
+  local cooldownInfo = C_Spell.GetSpellCooldown(self.spell_id)
+	local start = cooldownInfo.startTime
+	local duration = cooldownInfo.duration
 	if duration and (duration > self.gcd:GetDuration() or (duration > 0 and self.bar_start and self.bar_start > start + duration + EPS.time)) and start + duration > latest_expire then
 		latest_expire = start + duration
 		found = true
@@ -267,9 +269,9 @@ function Spell:UpdateCooldown(event, unit)
 	end
 
 	if self.spell_info.show_charges then
-		local currentCharges, maxCharges, cooldownStart, cooldownDuration = GetSpellCharges(self.spell_name)
-		if currentCharges then
-			self.icon_text = "" .. currentCharges
+		local chargesInfo = C_Spell.GetSpellCharges(self.spell_name)
+		if chargesInfo.currentCharges then
+			self.icon_text = "" .. chargesInfo.currentCharges
 		else
 			self.icon_text = ""
 		end
@@ -386,6 +388,10 @@ function Spell:UpdateDimInfo(bar_start)
 	end
 
 	if self.spell_info.max_rage and UnitMana("player") > self.spell_info.max_rage then
+		dim_start = bar_start
+	end
+
+	if self.spell_info.min_shards and UnitPower("player", 7) < self.spell_info.min_shards then
 		dim_start = bar_start
 	end
 

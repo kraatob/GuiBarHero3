@@ -253,7 +253,7 @@ function MainFrame:PickupSpell(nr, icons)
 	if name then
 		local _, spell_id = GuiBarHero.Utils:FindSpell(name)
 		if spell_id then
-			PickupSpell(spell_id)
+			C_Spell.PickupSpell(spell_id)
 		end
 	end
 end
